@@ -1,7 +1,8 @@
 package huypro.todoappbe.common.exception;
 
-import huypro.backend.common.dto.ErrorResponse;
 import java.util.Objects;
+
+import huypro.todoappbe.common.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
