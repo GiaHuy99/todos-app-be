@@ -4,100 +4,88 @@
 |---|---|
 | **Repository** | `todos-app-be` |
 | **Version** | 1.2 |
-| **Status** | Deployed |
+| **Status** | Complete |
 | **Full product PRD** | [todos-app/docs/PRD.md](../todos-app/docs/PRD.md) |
 
-This document covers **backend-specific** scope. UI requirements, user stories, and design live in the frontend repository.
+Backend-specific scope. UI requirements live in the frontend repository.
 
 ---
 
 ## 1. Backend responsibilities
 
-- Expose a REST API for todo CRUD operations
-- Persist todos in MySQL with pagination, search, and filter support
-- Validate input on the server
-- Return consistent error responses
-- Run in Docker on AWS EC2, connected to AWS RDS
+- REST API for todo CRUD
+- Server-side pagination, search, and filter
+- Input validation and consistent error responses
+- JPA persistence in MySQL
+- Docker packaging for portable deployment
 
 ---
 
-## 2. API requirements
+## 2. Technologies
+
+Spring Boot 4.1 · Java 21 · Spring Data JPA · MySQL 8 · Jakarta Validation · Lombok · Maven · Docker
+
+---
+
+## 3. API requirements
 
 | ID | Requirement |
 |---|---|
-| API-01 | Provide `GET /api/todos` with pagination (`page`, `size`) |
-| API-02 | Support `completed` query param for status filtering |
-| API-03 | Support `search` query param for case-insensitive title search |
-| API-04 | Provide `POST /api/todos` to create a todo (201) |
-| API-05 | Provide `GET /api/todos/{id}` to fetch a single todo |
-| API-06 | Provide `PUT /api/todos/{id}` for full update |
-| API-07 | Provide `PATCH /api/todos/{id}` for partial update (toggle completed) |
-| API-08 | Provide `DELETE /api/todos/{id}` (204 on success) |
-| API-09 | Return 404 when todo ID does not exist |
-| API-10 | Return 400 with message on validation failure |
+| API-01 | `GET /api/todos` with pagination (`page`, `size`) |
+| API-02 | Filter by `completed` query param |
+| API-03 | Search by `search` query param (title, case-insensitive) |
+| API-04 | `POST /api/todos` → 201 |
+| API-05 | `GET /api/todos/{id}` |
+| API-06 | `PUT /api/todos/{id}` full update |
+| API-07 | `PATCH /api/todos/{id}` partial update |
+| API-08 | `DELETE /api/todos/{id}` → 204 |
+| API-09 | 404 when todo not found |
+| API-10 | 400 on validation failure |
 
 ---
 
-## 3. Data model
+## 4. Data model
 
-| Field | Type | Required | Constraints |
-|---|---|---|---|
-| id | BIGINT | Yes | Auto-generated |
-| title | VARCHAR(120) | Yes | 1–120 characters |
-| description | VARCHAR(500) | No | Max 500 characters |
-| completed | BOOLEAN | Yes | Default `false` |
-| createdAt | TIMESTAMP | Yes | Set on create |
-| updatedAt | TIMESTAMP | Yes | Set on create/update |
+| Field | Type | Constraints |
+|---|---|---|
+| id | BIGINT | Auto-generated |
+| title | string | Required, max 120 |
+| description | string | Optional, max 500 |
+| completed | boolean | Default false |
+| createdAt | timestamp | Auto |
+| updatedAt | timestamp | Auto |
 
 ---
 
-## 4. Validation rules
+## 5. Validation rules
 
-| Field | Server rules |
+| Field | Rules |
 |---|---|
 | title | `@NotBlank`, `@Size(max = 120)` |
 | description | `@Size(max = 500)` |
-| completed | Boolean (PATCH/PUT) |
-
----
-
-## 5. Infrastructure requirements
-
-| ID | Requirement |
-|---|---|
-| INF-01 | Run as Docker container on AWS EC2 (port 8080) |
-| INF-02 | Connect to AWS RDS MySQL in the same VPC |
-| INF-03 | Database credentials via environment variables (`SPRING_DATASOURCE_*`) |
-| INF-04 | EC2 Security Group allows inbound 8080 for Cloudflare Worker |
-| INF-05 | RDS Security Group allows inbound 3306 from EC2 only |
-| INF-06 | Docker image published to Docker Hub, pulled on EC2 |
 
 ---
 
 ## 6. Integration
 
-| Environment | How frontend reaches backend |
+| Environment | Connection |
 |---|---|
-| Local dev | Vite proxy: `/api` → `http://localhost:8080` |
-| Production | Cloudflare Worker proxy: `/api/**` → `BACKEND_URL` (EC2) |
-
-The backend does not need to handle browser CORS in production when accessed through the Worker proxy. `CorsConfig` is configured for the Workers domain as a fallback.
+| Local dev | Direct `http://localhost:8080/api` or via Vite proxy |
+| Production | Frontend edge proxy forwards `/api/**` to backend |
 
 ---
 
 ## 7. Out of scope (MVP)
 
 - Authentication / authorization
-- Multi-tenant data isolation
+- Multi-tenant isolation
 - Database migrations (Flyway / Liquibase)
-- HTTPS termination on EC2 (HTTP behind Worker proxy)
 - Rate limiting
-- Audit logging
 
 ---
 
 ## 8. References
 
-- [Technical Design](./Technical-Design.md) — Architecture, API contract, Docker, AWS
-- [Frontend PRD](../todos-app/docs/PRD.md) — Full product requirements
-- [Frontend Technical Design](../todos-app/docs/Technical-Design.md) — Worker proxy, Cloudflare deploy
+- [Technical Design](./Technical-Design.md)
+- [Frontend PRD](../todos-app/docs/PRD.md)
+- [Frontend Technical Design](../todos-app/docs/Technical-Design.md)
