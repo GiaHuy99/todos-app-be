@@ -17,6 +17,7 @@ Spring Boot REST API for the Todo List application — layered architecture, JPA
 | **Utilities** | Lombok |
 | **Build** | Maven |
 | **Container** | Docker (multi-stage, Eclipse Temurin 21) |
+ **Deployment** | AWS(EC2, RDS) |
 
 ---
 
